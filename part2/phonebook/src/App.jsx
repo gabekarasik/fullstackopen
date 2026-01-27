@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const Filter = (props) => {
   return (
@@ -34,10 +34,29 @@ const PersonForm = (props) => {
   )
 }
 
+const Button = (props) => {
+  return (
+    <>
+      <button onClick={props.onClick}>delete</button>
+    </>
+  )
+}
+
 const Person = (props) => {
+  const onClick = (id) => {
+    if (window.confirm('Do you want to delete this person?')) {
+      personService
+      .removePerson(id)
+      .then(() => {})
+    }
+  }
+
   return (
     <div>
-      <li>{props.name} {props.number}</li>
+      <li>
+        {props.name} {props.number}
+        <Button onClick={() => onClick(props.id)}/>
+      </li>
     </div>
   )
 }
@@ -47,7 +66,7 @@ const Persons = (props) => {
   return (
     <div>
       {people.map(person =>
-        <Person key={person.name} name={person.name} number={person.number} />
+        <Person key={person.id} name={person.name} number={person.number} id={person.id} />
       )}
     </div>
   )
@@ -60,10 +79,10 @@ const App = () => {
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   })
 
@@ -81,14 +100,30 @@ const App = () => {
     setFilter(event.target.value)
   }
 
+  const updateNumber = (id, newNum) => {
+    const person = persons.find(p => p.id === id)
+    const updatedPerson = { ...person, number: newNum}
+    
+    personService
+      .update(id, updatedPerson)
+      .then(returnedPerson => {
+        setPersons(persons.map(person => person.id === id ? returnedPerson : person))
+      })
+  }
+
   const addPerson = (event) => {
     event.preventDefault()
 
     const exists = persons.some((person) => person.name.toUpperCase() === newName.toUpperCase())
 
     if (exists) {
-      window.alert(`${newName} is already added to phonebook`)
-      return
+      if (window.confirm("This person already exists. Do you want to update their phone number?")) {
+        const person = persons.find(p => p.name.toUpperCase() === newName.toUpperCase())
+        updateNumber(person.id, newNum)
+        return
+      } else {
+        return
+      }
     }
 
     const newPerson = {
@@ -96,8 +131,13 @@ const App = () => {
       number: newNum
     }
 
-    setPersons(persons.concat(newPerson))
-    setNewName('')
+    personService
+      .create(newPerson)
+      .then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
+        setNewName('')
+        setNewNum('')
+      })
   }
 
   return (
