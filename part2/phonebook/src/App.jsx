@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
+import Notification from './components/Notification'
+import ErrorMsg from './components/ErrorMsg'
 
 const Filter = (props) => {
   return (
@@ -77,6 +79,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [errMsg, setErrMsg] = useState(null)
 
   useEffect(() => {
     personService
@@ -108,6 +112,16 @@ const App = () => {
       .update(id, updatedPerson)
       .then(returnedPerson => {
         setPersons(persons.map(person => person.id === id ? returnedPerson : person))
+        setMessage(`Updated ${person.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+      })
+      .catch(error => {
+        setErrMsg(`Information of ${person.name} has already been removed from server`)
+        setTimeout(() => {
+          setErrMsg(null)
+        }, 5000)
       })
   }
 
@@ -138,11 +152,18 @@ const App = () => {
         setNewName('')
         setNewNum('')
       })
+
+    setMessage(`Added ${newPerson.name}`)
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
+      <ErrorMsg message={errMsg} />
       <Filter value={filter} onChange={handleFilterChange} />
       <h2>add new</h2>
       <PersonForm onSubmit={addPerson} newName={newName} handleNameChange={handleNameChange} newNum={newNum} handleNumChange={handleNumChange}/>
