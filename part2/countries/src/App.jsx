@@ -29,6 +29,11 @@ const App = () => {
   const [countries, setCountries] = useState([])
   const [display, setDisplay] = useState('Too many matches, specify another filter')
 
+  const showInfo = (event) => {
+    const country = countries.find(country => country.name.common === event.target.value)
+    setDisplay(<Display country={country} />)
+  }
+
   const handleCountryChange = (event) => {
     setNewCountry(event.target.value)
     const filteredCountries = countries.filter(country => country.name.common.toUpperCase().includes(event.target.value.toUpperCase()))
@@ -39,7 +44,11 @@ const App = () => {
       const country = filteredCountries[0]
       setDisplay(<Display country={country}/>)
     } else {
-      setDisplay(filteredCountries.map(country => <div key={country.name.common}>{country.name.common}</div>))
+      setDisplay(filteredCountries.map(country => 
+        <div key={country.name.common}>
+          {country.name.common} {' '}
+          <button type='submit' value={country.name.common} onClick={showInfo}>Show</button>
+        </div>))
     }
   }
   
