@@ -88,7 +88,8 @@ const App = () => {
       .then(initialPersons => {
         setPersons(initialPersons)
       })
-  })
+    console.log("It's happening here...")
+  }, [])
 
   const peopleToShow = persons.filter(person => person.name.toUpperCase().includes(filter.toUpperCase()))
 
