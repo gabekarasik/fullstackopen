@@ -7,6 +7,7 @@ morgan.token('body', function getBody (request) {
 })
 
 app.use(express.json())
+app.use(express.static('dist'))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 let persons = [
@@ -60,12 +61,11 @@ app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
   persons = persons.filter(person => person.id !== id)
 
-  response.json(persons)
   response.status(204).end()
 })
 
 function genID() {
-  return Math.floor(Math.random() * 1000000)
+  return String(Math.floor(Math.random() * 1000000))
 }
 
 app.post('/api/persons', (request, response) => {
@@ -93,7 +93,8 @@ app.post('/api/persons', (request, response) => {
 
   response.json(person)
 })
-const PORT = 3001
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 })
