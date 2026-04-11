@@ -45,19 +45,11 @@ const Button = (props) => {
 }
 
 const Person = (props) => {
-  const onClick = (id) => {
-    if (window.confirm('Do you want to delete this person?')) {
-      personService
-      .removePerson(id)
-      .then(() => {})
-    }
-  }
-
   return (
     <div>
       <li>
         {props.name} {props.number}
-        <Button onClick={() => onClick(props.id)}/>
+        <Button onClick={() => props.onClick(props.id)}/>
       </li>
     </div>
   )
@@ -68,7 +60,7 @@ const Persons = (props) => {
   return (
     <div>
       {people.map(person =>
-        <Person key={person.id} name={person.name} number={person.number} id={person.id} />
+        <Person key={person.id} name={person.name} number={person.number} id={person.id} onClick={props.onClick}/>
       )}
     </div>
   )
@@ -103,6 +95,16 @@ const App = () => {
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
+  }
+
+  const onRemove = (id) => {
+    if (window.confirm('Do you want to delete this person?')) {
+      personService
+      .removePerson(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
+    }
   }
 
   const updateNumber = (id, newNum) => {
@@ -169,7 +171,7 @@ const App = () => {
       <h2>add new</h2>
       <PersonForm onSubmit={addPerson} newName={newName} handleNameChange={handleNameChange} newNum={newNum} handleNumChange={handleNumChange}/>
       <h2>Numbers</h2>
-      <Persons peopleToShow={peopleToShow} />
+      <Persons peopleToShow={peopleToShow} onClick={onRemove}/>
     </div>
   )
 }
