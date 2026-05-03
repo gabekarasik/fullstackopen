@@ -1,6 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
+const person = require('./models/person')
 const app = express()
+const Person = require('./models/person')
 
 morgan.token('body', function getBody (request) {
   return JSON.stringify(request.body)
@@ -34,7 +37,9 @@ let persons = [
 ]
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+      response.json(persons)
+    })
 })
 
 app.get('/info', (request, response) => {
@@ -83,15 +88,14 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  const person = {
-    "id": genID(),
-    "name": body.name,
-    "number": body.number
-  }
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
 
-  persons = persons.concat(person)
-
-  response.json(person)
+  person.save().then(savedPerson => {
+    response.json(person)
+  })
 })
 
 const PORT = process.env.PORT || 3001
